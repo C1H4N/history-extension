@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Site Geçmiş Temizleyici",
+  "version": "1.0.0",
+  "description": "Belirli bir site için tarayıcı geçmişini temizleyin - tüm geçmiş veya tarih aralığına göre",
+  "permissions": [
+    "history",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
