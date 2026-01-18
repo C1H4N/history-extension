@@ -95,27 +95,25 @@ async function handlePreview() {
   hideStatus();
 
   try {
-    // Build search query
-    const searchParams = {
-      text: normalizedDomain,
-      maxResults: 10000
-    };
+    // Search the entire history by default (Chrome only searches the last 24 hours without startTime)
+    let startTime = 0;
+    let endTime = Date.now();
 
     // Add date filter if enabled
     if (useDateFilterCheckbox.checked && startDateInput.value) {
       const startDate = new Date(startDateInput.value);
       startDate.setHours(0, 0, 0, 0);
-      searchParams.startTime = startDate.getTime();
+      startTime = startDate.getTime();
 
       if (endDateInput.value) {
         const endDate = new Date(endDateInput.value);
         endDate.setHours(23, 59, 59, 999);
-        searchParams.endTime = endDate.getTime();
+        endTime = endDate.getTime();
       }
     }
 
     // Search history
-    const results = await chrome.history.search(searchParams);
+    const results = await searchHistory(normalizedDomain, startTime, endTime);
 
     // Filter results to match domain exactly
     foundItems = results.filter(item => {
@@ -144,6 +142,28 @@ async function handlePreview() {
   } finally {
     previewBtn.classList.remove('loading');
   }
+}
+
+// Search history without a silent result limit:
+// if a time range hits MAX_RESULTS, split it in half and search both halves
+const MAX_RESULTS = 10000;
+
+async function searchHistory(text, startTime, endTime) {
+  const results = await chrome.history.search({ text, startTime, endTime, maxResults: MAX_RESULTS });
+
+  if (results.length < MAX_RESULTS || endTime - startTime <= 1) {
+    return results;
+  }
+
+  const middle = Math.floor((startTime + endTime) / 2);
+  const [newer, older] = await Promise.all([
+    searchHistory(text, middle, endTime),
+    searchHistory(text, startTime, middle)
+  ]);
+
+  // A URL visited in both halves is returned twice
+  const seenUrls = new Set(newer.map(item => item.url));
+  return newer.concat(older.filter(item => !seenUrls.has(item.url)));
 }
 
 // Handle Delete
