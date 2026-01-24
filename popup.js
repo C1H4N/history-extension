@@ -65,7 +65,7 @@ function updateActiveButton(domain) {
   const normalizedDomain = normalizeDomain(domain);
   siteButtons.forEach(btn => {
     const btnDomain = btn.dataset.domain;
-    if (btnDomain === normalizedDomain || normalizedDomain.includes(btnDomain.replace('.com', '').replace('.tv', ''))) {
+    if (matchesDomain(normalizedDomain, btnDomain)) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
@@ -120,7 +120,7 @@ async function handlePreview() {
       try {
         const url = new URL(item.url);
         const itemDomain = url.hostname.replace(/^www\./, '');
-        return itemDomain.includes(normalizedDomain) || normalizedDomain.includes(itemDomain);
+        return matchesDomain(itemDomain, normalizedDomain);
       } catch {
         return false;
       }
@@ -253,12 +253,17 @@ function hideStatus() {
 
 // Utility Functions
 function normalizeDomain(domain) {
-  // Remove protocol and www
+  // Remove protocol, www, port, path, query and hash
   return domain
+    .toLowerCase()
     .replace(/^https?:\/\//, '')
     .replace(/^www\./, '')
-    .replace(/\/.*$/, '')
-    .toLowerCase();
+    .replace(/[/?#:].*$/, '');
+}
+
+// Exact domain or one of its subdomains (m.youtube.com matches youtube.com, notyoutube.com does not)
+function matchesDomain(hostname, domain) {
+  return hostname !== '' && domain !== '' && (hostname === domain || hostname.endsWith('.' + domain));
 }
 
 function extractDomain(url) {
