@@ -101,12 +101,13 @@ async function handlePreview() {
 
     // Add date filter if enabled
     if (useDateFilterCheckbox.checked && startDateInput.value) {
-      const startDate = new Date(startDateInput.value);
+      // "T00:00:00" makes the date local time (a date-only string is parsed as UTC)
+      const startDate = new Date(`${startDateInput.value}T00:00:00`);
       startDate.setHours(0, 0, 0, 0);
       startTime = startDate.getTime();
 
       if (endDateInput.value) {
-        const endDate = new Date(endDateInput.value);
+        const endDate = new Date(`${endDateInput.value}T00:00:00`);
         endDate.setHours(23, 59, 59, 999);
         endTime = endDate.getTime();
       }
@@ -201,41 +202,36 @@ async function handleDelete() {
 function showPreview(items) {
   previewSection.classList.remove('hidden');
   previewCount.textContent = `${items.length} kayıt bulundu`;
+  previewList.textContent = '';
 
   if (items.length === 0) {
-    previewList.innerHTML = '<div class="preview-empty">Kayıt bulunamadı</div>';
+    previewList.appendChild(createElement('div', 'preview-empty', 'Kayıt bulunamadı'));
     return;
   }
 
-  // Show only first 50 items in preview
-  const displayItems = items.slice(0, 50);
-
-  previewList.innerHTML = displayItems.map(item => {
+  // Show only first 50 items in preview (built with textContent, so titles/URLs are never parsed as HTML)
+  items.slice(0, 50).forEach(item => {
     const date = new Date(item.lastVisitTime);
-    const formattedDate = formatDisplayDate(date);
-    const title = item.title || extractDomain(item.url);
+    const title = createElement('span', 'preview-item-title', item.title || extractDomain(item.url));
+    title.title = item.url;
 
-    return `
-      <div class="preview-item">
-        <span class="preview-item-title" title="${escapeHtml(item.url)}">${escapeHtml(title)}</span>
-        <span class="preview-item-date">${formattedDate}</span>
-      </div>
-    `;
-  }).join('');
+    const row = createElement('div', 'preview-item');
+    row.append(title, createElement('span', 'preview-item-date', formatDisplayDate(date)));
+    previewList.appendChild(row);
+  });
 
   if (items.length > 50) {
-    previewList.innerHTML += `
-      <div class="preview-item" style="justify-content: center; color: var(--text-muted);">
-        ... ve ${items.length - 50} kayıt daha
-      </div>
-    `;
+    const more = createElement('div', 'preview-item', `... ve ${items.length - 50} kayıt daha`);
+    more.style.justifyContent = 'center';
+    more.style.color = 'var(--text-muted)';
+    previewList.appendChild(more);
   }
 }
 
 // Hide Preview
 function hidePreview() {
   previewSection.classList.add('hidden');
-  previewList.innerHTML = '';
+  previewList.textContent = '';
   foundItems = [];
 }
 
@@ -275,7 +271,11 @@ function extractDomain(url) {
 }
 
 function formatDate(date) {
-  return date.toISOString().split('T')[0];
+  // Local date for <input type="date"> (toISOString uses UTC and can give the previous day)
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`;
 }
 
 function formatDisplayDate(date) {
@@ -285,8 +285,9 @@ function formatDisplayDate(date) {
   return `${day}.${month}.${year}`;
 }
 
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+function createElement(tag, className, text = '') {
+  const element = document.createElement(tag);
+  element.className = className;
+  element.textContent = text;
+  return element;
 }

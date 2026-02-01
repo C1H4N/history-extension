@@ -349,6 +349,13 @@ input:focus+.input-icon,
   font-size: 13px;
 }
 
+.date-note {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--warning);
+}
+
 /* ===== Preview Section ===== */
 .preview-section {
   background: var(--bg-secondary);
