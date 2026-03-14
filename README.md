@@ -19,8 +19,8 @@
 
 ## ✨ Özellikler
 
-- 🎯 **Site Bazlı Silme** — Sadece belirli bir domain için geçmişi sil
-- 📅 **Tarih Filtresi** — Belirli bir tarih aralığındaki kayıtları sil
+- 🎯 **Site Bazlı Silme** — Sadece belirli bir domain ve alt alan adları için geçmişi sil (örn. `youtube.com` → `m.youtube.com` dahil)
+- 📅 **Tarih Filtresi** — Belirli bir tarih aralığında ziyaret edilen sayfaları sil
 - 👁️ **Önizleme** — Silmeden önce kaç kayıt bulunduğunu gör
 - ⚡ **Hızlı Seçim** — YouTube, Instagram, TikTok gibi popüler sitelere tek tıkla erişim
 - 🎨 **Modern Arayüz** — Koyu tema, minimal ve şık tasarım
@@ -51,6 +51,8 @@ Brave, Opera, Vivaldi gibi Chromium tabanlı tarayıcılarda da benzer adımlarl
 4. **Önizle** butonuna tıkla
 5. Bulunan kayıtları incele
 6. **Geçmişi Sil** butonuna tıkla
+
+> **Not:** Tarih aralığı kullanıldığında, bu aralıkta ziyaret edilen sayfalar geçmişten tamamen silinir; aynı sayfanın aralık dışındaki ziyaretleri de silinir. Tarayıcının geçmiş API'si tek tek ziyaret silmeye izin vermez.
 
 ## ⚡ Hızlı Seçim Siteleri
 
@@ -90,16 +92,20 @@ Bu eklenti:
 ## 📁 Dosya Yapısı
 
 ```
-site-gecmis-temizleyici/
+history-extension/
 ├── manifest.json      # Eklenti yapılandırması
 ├── popup.html         # Popup arayüzü
 ├── popup.css          # Stiller
 ├── popup.js           # Uygulama mantığı
 ├── README.md          # Dokümantasyon
+├── LICENSE            # MIT Lisansı
 └── icons/
     ├── icon16.png
+    ├── icon16.svg     # PNG ikonların kaynağı
     ├── icon48.png
-    └── icon128.png
+    ├── icon48.svg
+    ├── icon128.png
+    └── icon128.svg
 ```
 
 ## 🤝 Katkıda Bulunma
